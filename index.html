@@ -1,0 +1,116 @@
+<!doctype html>
+<html>
+  <head>
+    <meta name="description" content="A page for the http chat room">
+    <!-- Required meta tags -->
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
+      
+    <!-- Bootstrap CSS -->
+    <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.2.1/css/bootstrap.min.css" integrity="sha384-GJzZqFGwb1QTTN6wy59ffF1BuGJpLSa9DkKMp0DgiMDm4iYMj70gZWKYbI706tWS" crossorigin="anonymous">
+
+
+    <title>HTTP Chat Room</title>
+    <link rel="icon" type="image/png" href="image/titleLOGO.png" />
+
+    <link href="styles.css" rel="stylesheet" type="text/css">
+  </head>
+
+  <body>
+      
+    <div class="container">
+        
+        <div id="userFormArea" class="row">
+            <div class="col">
+                <form id="userForm">
+                    <div class="form-group">
+                        <input class="form-control" id="username" placeholder="Please create your new user name" />
+                        <br />
+                        <input type="submit" class="btn btn-info" value="Login" />
+                    </div>
+                </form>
+            </div>
+        </div>
+        
+        <div id="messageArea" class="row">
+             <div class="col">
+                <div class="well">
+                    <h1>Online Users</h1>
+                    <ul class="list-group" id="users"></ul>
+                </div>
+            </div>
+            
+            <div class="col">
+                <h2>Chat History</h2>
+                <div class="chat" id="chat"></div>
+                <form id="messageForm">
+                    <div class="form-group">
+                        <textarea class="form-control" id="message" placeholder="Please enter your message"></textarea>
+                        <br />
+                        <input type="submit" class="btn btn-info" value="Send Message" />
+                    </div>
+                </form>
+                
+            </div>
+            
+            
+        </div>
+    </div>
+            
+
+
+    <script src="/socket.io/socket.io.js"></script>
+    <!-- Optional JavaScript -->
+    <!-- jQuery first, then Popper.js, then Bootstrap JS -->
+    <script src="https://code.jquery.com/jquery-3.3.1.slim.min.js" integrity="sha384-q8i/X+965DzO0rT7abK41JStQIAqVgRVzpbzo5smXKp4YfRvH+8abtTE1Pi6jizo" crossorigin="anonymous"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/popper.js/1.14.6/umd/popper.min.js" integrity="sha384-wHAiFfRlMFy6i5SRaxvfOCifBUQy1xHdJ/yoi7FRNXMRBu5WHdZYu1hA6ZOblgut" crossorigin="anonymous"></script>
+    <script src="https://stackpath.bootstrapcdn.com/bootstrap/4.2.1/js/bootstrap.min.js" integrity="sha384-B0UglyR+jN6CkvvICOB2joaf5I4l3gm9GU6Hc1og6Ls7i6U/mkkaduKaBhlAXv9k" crossorigin="anonymous"></script>
+
+    <script>
+      $(function () {
+        var socket = io.connect();
+        var $messageForm = $('#messageForm');
+        var $message = $('#message');
+        var $chat = $('#chat');
+          
+        var $messageArea = $('#messageArea');
+        var $userFormArea = $('#userFormArea');
+        var $userForm = $('#userForm');
+        var $users = $('#users');
+        var $username = $('#username');
+        
+          
+        $messageForm.submit(function(e){
+            e.preventDefault();
+            socket.emit('send message', $message.val());
+            $message.val('');                            
+        });
+          
+        socket.on('new message', function(data){
+          $chat.append('<div class="well"><strong>' + data.currenttime + "</strong>" + data.user + ':<strong>' + data.msg + '</strong></div>');
+        });
+          
+        $userForm.submit(function(e){
+            e.preventDefault();
+            socket.emit('new user', $username.val(), function(data){
+                if(data){
+                    $userFormArea.hide();
+                    $messageArea.show();
+                }
+            });
+            $username.val('');
+        });
+          
+        socket.on('get users', function(data){
+            var html = '';
+            for(i = 0; i < data.length; i++){
+                html += '<li class="list-group-item">' + data[i] + '</li>';
+            }
+            $users.html(html);
+        });
+        
+      });
+    </script>
+
+  </body>
+</html>
