@@ -19,7 +19,7 @@ app.get('/styles.css', function(req, res){
   res.sendFile(__dirname + '/styles.css');
 });
 
-app.use(cookieParser());
+//app.use(cookieParser());
 
 io.on('connection', function(socket){
     currenttime = currentTime();    // get the current time

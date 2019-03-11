@@ -72,14 +72,14 @@
         var $messageForm = $('#messageForm');
         var $message = $('#message');
         var $chat = $('#chat');
-          
-        var $messageArea = $('#messageArea');
-        var $userFormArea = $('#userFormArea');
-        var $userForm = $('#userForm');
+        var color;
+        var newcolor;
         var $users = $('#users');
+        var $messageArea = $('#messageArea');
+        var $userForm = $('#userForm');
+        var $userFormArea = $('#userFormArea');
         var $username = $('#username');
-        
-          
+         
         $messageForm.submit(function(e){
             e.preventDefault();
             socket.emit('send message', $message.val());
@@ -87,7 +87,14 @@
         });
           
         socket.on('new message', function(data){
-          $chat.append('<div class="well"><strong>' + data.currenttime + "</strong>" + data.user + ':<strong>' + data.msg + '</strong></div>');
+            color = data.msg.split(" ");
+            if(color[0] === "/nickcolor"){
+                newcolor = color[1];
+            }else if(color[0] === "/nick"){
+                data.user = color[1];
+            }else{
+              $chat.append('<div class="well"><strong>' + data.currenttime + "</strong>" + '<span style="color:' + newcolor + ' ">' +  data.user + '</span>' + ':<strong>' + data.msg + '</strong></div>');        
+            }
         });
           
         $userForm.submit(function(e){
@@ -98,15 +105,15 @@
                     $messageArea.show();
                 }
             });
-            $username.val('');
+            $username.val('');  // clean up
         });
           
         socket.on('get users', function(data){
-            var html = '';
+            var disply = '';
             for(i = 0; i < data.length; i++){
                 html += '<li class="list-group-item">' + data[i] + '</li>';
             }
-            $users.html(html);
+            $users.html(disply);
         });
         
       });
